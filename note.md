@@ -35,3 +35,84 @@
     - 文档超长、信息多、追求全面 → MapReduce链（可配合并行加速）
     - 要求输出逻辑连贯、高质量、逐步推导 → Refine链（接受较慢速度和较高成本）
     - 问题有唯一正确答案、需要精准定位 → Map-Rerank链 
+
+
+- LangChain Memory 使用总结
+  - 核心作用
+    - 在链（Chain）或代理（Agent）的多轮交互中保持状态
+    - 存储和检索对话历史、实体信息、摘要等
+  - 核心接口
+    - `load_memory_variables`：加载记忆变量
+    - `save_context`：保存当前对话上下文
+  - 集成方式
+    - 通过 `ConversationChain` 等链直接使用
+    - 自定义链中调用 memory 方法
+
+  - 主要 Memory 类型
+    - 1. ConversationBufferMemory（缓冲存储器）
+      - 逻辑：存储所有对话历史，简单拼接
+      - 优点：信息完整无损失
+      - 缺点：容易超出上下文窗口，浪费 token
+      - 场景：短对话、需要完整上下文的简单任务
+
+    - 2. ConversationBufferWindowMemory（窗口缓冲存储器）
+      - 逻辑：只保留最近 K 轮对话
+      - 优点：控制 token 长度，避免无限增长
+      - 缺点：可能丢失早期关键信息
+      - 场景：长对话，只需最近上下文（如客服闲聊）
+
+    - 3. ConversationEntityMemory（实体存储器）
+      - 逻辑：自动提取并存储对话中的实体（人名、地点等）
+      - 优点：聚焦关键信息，节省 token
+      - 缺点：实体提取依赖模型，可能不准确
+      - 场景：需要记住特定实体信息的对话（如预约、个性化推荐）
+
+    - 4. ConversationSummaryMemory（摘要存储器）
+      - 逻辑：定期对历史对话生成摘要，并存储摘要
+      - 优点：高度压缩信息，保留核心
+      - 缺点：摘要可能丢失细节；每次调用需生成摘要，增加开销
+      - 场景：超长对话，需要压缩历史（如长期陪伴型助手）
+
+    - 5. ConversationSummaryBufferMemory（摘要缓冲存储器）
+      - 逻辑：结合缓冲与摘要：在 token 达到阈值时，将早期对话摘要化，保留最近对话原始文本
+      - 优点：平衡细节与长度，智能管理上下文
+      - 缺点：实现相对复杂
+      - 场景：极长对话，希望保留最近细节同时压缩早期历史
+
+    - 6. VectorStoreRetrieverMemory（向量存储检索存储器）
+      - 逻辑：将对话历史存入向量数据库，每次根据输入检索最相关的历史片段
+      - 优点：可扩展，支持超长历史；只注入相关信息，避免无关内容
+      - 缺点：依赖向量检索质量；需要配置向量数据库
+      - 场景：超长对话库、基于知识库的问答，需要动态检索记忆
+
+    - 7. CombinedMemory（组合存储器）
+      - 逻辑：组合多种 memory（如摘要 + 实体）
+      - 优点：综合利用不同记忆优势
+      - 缺点：管理复杂，需协调多个 memory 的输出
+      - 场景：复杂任务需要同时使用多种记忆（如实体追踪 + 摘要）
+
+  - 其他 Memory 类型
+    - 知识图谱记忆（KnowledgeGraphMemory）
+      - 存储实体间关系，支持推理
+    - 自定义 Memory
+      - 实现 `BaseMemory` 接口，满足特定需求
+
+  - 选择 Memory 的指南
+    - 根据对话长度
+      - 短对话 → Buffer
+      - 长对话 → Window / Summary / VectorStore
+    - 根据信息类型
+      - 需要实体追踪 → EntityMemory
+      - 需要关系推理 → KnowledgeGraphMemory
+    - 根据性能要求
+      - 严格控制 token → Window / SummaryBuffer / Summary
+    - 根据检索需求
+      - 需要动态召回历史 → VectorStoreRetrieverMemory
+
+  - 高级话题
+    - 持久化
+      - 将 memory 内容保存到数据库（如 Redis、SQLite）实现跨会话记忆
+    - 与 Agent 集成
+      - 为 Agent 配备 memory 以实现多轮工具调用和状态跟踪
+    - 多会话管理
+      - 通过 session_id 区分不同用户的记忆    
