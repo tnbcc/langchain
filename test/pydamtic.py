@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from langchain_community.llms import Tongyi
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
-from pydantic import BaseModel, Field  # 如果使用方案一，保持原导入
+from pydantic import BaseModel, Field 
 import pandas as pd
 
 load_dotenv()
