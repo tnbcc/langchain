@@ -100,7 +100,7 @@ def run_gmail_agent(user_input: str) -> str:
         temperature=TEMPERATURE,
     )
     tools = get_gmail_tools()
-    agent = create_agent(llm, tools)   # 使用新函数名
+    agent = create_agent(llm, tools)  
     print(f"🔍 任务启动: {user_input}\n" + "=" * 50)
     inputs = {"messages": [HumanMessage(content=user_input)]}
     config = {"recursion_limit": RECURSION_LIMIT}
