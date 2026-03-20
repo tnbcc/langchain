@@ -1,3 +1,5 @@
 langchain_env/*
 .env
 .vscode/
+test/OneFlower/*
+test/tools/chroma_db
