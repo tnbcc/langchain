@@ -2,3 +2,4 @@ credentials.json
 token.json
 gmail_agent.log
 .env
+src/__pycache__
