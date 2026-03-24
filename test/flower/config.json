@@ -1,0 +1,13 @@
+{
+  "serpapi": {
+    "description": "微博UID搜索工具",
+    "api_key_env": "SERPAPI_API_KEY",
+    "search_engine": "baidu"
+  },
+  "project": "微博鲜花推广大V搜寻",
+  "features": [
+    "基于关键词模糊搜索微博用户",
+    "获取大V公开信息",
+    "生成联络方案"
+  ]
+}
